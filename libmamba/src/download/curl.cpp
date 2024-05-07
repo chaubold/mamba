@@ -90,6 +90,9 @@ namespace mamba::download
                 {
 #ifdef LIBMAMBA_STATIC_DEPS
                     curl_easy_setopt(handle, CURLOPT_CAINFO, nullptr);
+                    long current_options = curl_easy_getopt(handle, CURLOPT_SSL_OPTIONS);
+                    curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, current_options | CURLSSLOPT_NATIVE_CA);
+
                     if (proxy)
                     {
                         curl_easy_setopt(handle, CURLOPT_PROXY_CAINFO, nullptr);
@@ -105,6 +108,9 @@ namespace mamba::download
                     else
                     {
                         curl_easy_setopt(handle, CURLOPT_CAINFO, ssl_verify.c_str());
+                        long current_options = curl_easy_getopt(handle, CURLOPT_SSL_OPTIONS);
+                        curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, current_options | CURLSSLOPT_NATIVE_CA);
+                        
                         if (proxy)
                         {
                             curl_easy_setopt(handle, CURLOPT_PROXY_CAINFO, ssl_verify.c_str());
