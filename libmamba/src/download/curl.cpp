@@ -61,9 +61,10 @@ namespace mamba::download
 
             curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, connect_timeout_secs);
 
+            long curl_ssl_options = 0;
             if (set_ssl_no_revoke)
             {
-                curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NO_REVOKE);
+                curl_ssl_options |= CURLSSLOPT_NO_REVOKE;
             }
 
             if (proxy)
@@ -90,6 +91,8 @@ namespace mamba::download
                 {
 #ifdef LIBMAMBA_STATIC_DEPS
                     curl_easy_setopt(handle, CURLOPT_CAINFO, nullptr);
+                    curl_ssl_options |= CURLSSLOPT_NATIVE_CA;
+
                     if (proxy)
                     {
                         curl_easy_setopt(handle, CURLOPT_PROXY_CAINFO, nullptr);
@@ -105,12 +108,19 @@ namespace mamba::download
                     else
                     {
                         curl_easy_setopt(handle, CURLOPT_CAINFO, ssl_verify.c_str());
+                        curl_ssl_options |= CURLSSLOPT_NATIVE_CA;
+
                         if (proxy)
                         {
                             curl_easy_setopt(handle, CURLOPT_PROXY_CAINFO, ssl_verify.c_str());
                         }
                     }
                 }
+            }
+
+            if (curl_ssl_options != 0)
+            {
+                curl_easy_setopt(handle, CURLOPT_SSL_OPTIONS, curl_ssl_options);
             }
         }
 
